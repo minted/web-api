@@ -1,7 +1,9 @@
 import { version } from '../../package.json';
 import { Router } from 'express';
 import products from './products';
+// TODO: refactor to import products model instead of productsDB
 import productsDB from '../db/sku-data.json';
+import recommendationsModel from '../models/recommendations';
 
 export default ({ config, db }) => {
 	let api = Router();
@@ -38,11 +40,21 @@ export default ({ config, db }) => {
 
       const results = {};
 
-      for (let i = 0; i < n; i++) {
-        const skuIdx = getIntInRange(0, skus.length - 1);
-        const sku = skus[skuIdx];
-        const skuObj = productsDB[sku];
-        results[sku] = skuObj;
+      // Use Recommendation Data if we have it
+      if (recommendationsModel.hasOwnProperty(sku)) {
+        console.log(recommendationsModel[sku]);
+        recommendationsModel[sku].forEach(sku => {
+          const skuObj = productsDB[sku];
+          results[sku] = skuObj;
+        });
+      } else {
+        // Get n number of random items
+        for (let i = 0; i < n; i++) {
+          const skuIdx = getIntInRange(0, skus.length - 1);
+          const sku = skus[skuIdx];
+          const skuObj = productsDB[sku];
+          results[sku] = skuObj;
+        }
       }
 
       return results;
