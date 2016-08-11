@@ -1,7 +1,7 @@
 import { version } from '../../package.json';
 import { Router } from 'express';
-import images from './images';
-import imagesDB from '../db/images.json';
+import products from './products';
+import productsDB from '../db/sku-data.json';
 
 export default ({ config, db }) => {
 	let api = Router();
@@ -12,8 +12,8 @@ export default ({ config, db }) => {
 		res.json({ version });
 	});
 
-  // mount the images resource
-  api.use('/images', images({ config, db }));
+  // mount the products resource
+  api.use('/products', products({ config, db }));
 
   // Recommendations Endpoints
   // TODO: abstract this into a separate model
@@ -24,31 +24,31 @@ export default ({ config, db }) => {
     // parse, validate, set default value for number of recommendations to show
     n = parseInt(n) || 5;
 
-    const images = (imagesDB.hasOwnProperty(sku) ? imagesDB[sku] : null);
-    if (!imagesDB) {
+    const products = (productsDB.hasOwnProperty(sku) ? productsDB[sku] : null);
+    if (!productsDB) {
       return res.status(500).send('Sku not found!');
     }
 
-    function getRecommendations(sku, n, imagesDB) {
+    function getRecommendations(sku, n, productsDB) {
       function getIntInRange(min, max) {
         return Math.floor(Math.random() * (max + 1 - min)) + min;
       }
 
-      const skus = Object.keys(imagesDB);
+      const skus = Object.keys(productsDB);
 
       const results = {};
 
       for (let i = 0; i < n; i++) {
         const skuIdx = getIntInRange(0, skus.length - 1);
         const sku = skus[skuIdx];
-        const skuObj = imagesDB[sku];
+        const skuObj = productsDB[sku];
         results[sku] = skuObj;
       }
 
       return results;
     }
 
-    res.send(getRecommendations(sku, n, imagesDB));
+    res.send(getRecommendations(sku, n, productsDB));
   });
 
 	return api;
