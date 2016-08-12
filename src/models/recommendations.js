@@ -1,3 +1,2 @@
-import recommendations from '../db/recommendations.json';
-
-export default recommendations;
+export { default as mlRecommendations } from '../db/ml-recommendations.json';
+export { default as curatorRecommendations } from '../db/curator-recommendations.json';
